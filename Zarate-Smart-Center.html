@@ -1,0 +1,350 @@
+<!doctype html>
+<html lang="es">
+
+<head>
+  <title>Make Zarate Smart Center</title>
+  <link href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/@mdi/font@5.x/css/materialdesignicons.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.min.css" rel="stylesheet">
+  <link rel="shortcut icon" type="image/png"
+    href="https://bayergroup.sharepoint.com/sites/004767/digitalizacion/SitiosCustom/img/Icono_Dashboards.png" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, minimal-ui">
+  <script src="https://cdn.jsdelivr.net/npm/vue@2.x/dist/vue.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.js"></script>
+  <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+</head>
+
+
+<body>
+  <div id="app" class="height:100%">
+    <v-app dark>
+      <v-parallax height="1000" style="height:100% " id="my-lax" 
+        :src="foto"
+        >
+        <v-main>
+          <v-container align="start"  justify="space-around">
+            <v-row>
+              <v-spacer></v-spacer>
+              <v-col class="text-center pt-10">
+                <v-avatar size="150">
+                  <img
+                  src="https://bayergroup.sharepoint.com/sites/004767/digitalizacion/SitiosCustom/img/icoBayer.png">
+                </v-avatar>
+                <h1 class="pt-8">Zarate Smart Center</h1>
+              </v-col>
+              <v-spacer></v-spacer>
+            </v-row>
+            <v-row v-if="menu=='menu'">
+              <v-spacer></v-spacer>
+              <div class="pa-4">
+                <v-btn large @click="pasar(1,'KPIs by Areas')">
+                  KPIs by Areas
+                </v-btn>
+              </div>
+              <div class="pa-4">
+                <v-btn large @click="pasar(2,'KPIs by Pillars')">
+                  KPIs by Pillars
+                </v-btn>
+              </div>
+              <v-spacer></v-spacer>
+            </v-row>
+            <v-row v-if="menu == 'KPIs by Pillars'">
+              <v-spacer></v-spacer>
+              <v-btn large @click="pasar(3,'menu')">
+                <v-icon>mdi-chevron-left</v-icon> {{ menu }}
+              </v-btn>
+              <v-spacer></v-spacer>
+            </v-row>
+            <v-row v-if="menu == 'KPIs by Areas'">
+              <v-spacer></v-spacer>
+              <v-btn large @click="pasar(3,'menu')">
+                {{ menu }}  <v-icon>mdi-chevron-right</v-icon>
+              </v-btn>
+              <v-spacer></v-spacer>
+            </v-row>
+            <v-row v-if="menu=='KPIs by Pillars'" align="start" justify="space-around">
+              <template v-for="(hijo,k) in Tactical">
+                <v-col class="pa-4">
+                  <v-btn block :color="hijo.color" class="white--text" @click="verlista(k)">
+                    {{ hijo.text }}
+                  </v-btn>
+                  <v-container 
+                    v-if="hijo.disable"                    
+                    class="overflow-y: scroll;"
+                    max-height="60">      
+                    <template  v-for="link in hijo.lista" >
+                      <v-hover
+                        v-slot="{ hover }"                       
+                        close-delay="131"
+                        open-delay="12"
+                      >
+                      <div v-if="hover">
+                        <v-card 
+                          :elevation="hover ? 16 : 2"
+                          :class="{ 'on-hover': hover }"
+                          class="mx-auto"
+                          :href="link.link" target="_blank"
+                        ><v-card-text class="font-weight-medium mt-3 text-center subtitle-1">
+                          {{ link.Title }}
+                        </v-card-text>
+                      </v-card>
+                        <h4><span>Focal Point :</span>{{ link.Focal_Point}}</h4>
+                      </div>
+                      <div v-else>
+                        <v-card color="primary" class="mx-auto white--text">
+                          <v-card-text class="font-weight-medium mt-3 text-center subtitle-1">
+                            {{ link.Title }}
+                          </v-card-text>
+                        </v-card>
+                      </div>
+                      </v-hover>
+                    </template>
+                  </v-container>
+                </v-col>
+              </template>
+            </v-row>
+            <v-row v-if="menu=='KPIs by Areas'" align="start" justify="space-around">
+              <v-col class="pa-4 col-4">
+                <template  v-for="(dash,k) in Strategic" >
+                  <v-hover
+                    v-slot="{ hover }"                       
+                    close-delay="131"
+                    open-delay="12"
+                  >
+                  <div v-if="hover">
+                    <v-card 
+                      :elevation="hover ? 16 : 2"
+                      :class="{ 'on-hover': hover }"
+                      class="mx-auto"
+                      :href="dash.link" target="_blank"
+                    ><v-card-text class="font-weight-medium mt-3 text-center subtitle-1">
+                      {{ dash.text }}
+                      <span v-if="dash.beta" class="red--text">BETA</span>
+                    </v-card-text>
+                  </v-card>
+                    <h4><span>Focal Point: </span>{{ dash.focal}}</h4>
+                  </div>
+                  <div v-else>
+                    <v-card color="primary" class="mx-auto white--text">
+                      <v-card-text class="font-weight-medium mt-3 text-center subtitle-1">
+                        {{ dash.text }}
+                      </v-card-text>
+                    </v-card>
+                  </div>
+                  </v-hover>
+                </template>
+            </v-col>
+            <v-col class="pa-4 col-4">
+              <v-hover
+                    v-slot="{ hover }"                       
+                    close-delay="131"
+                    open-delay="12"
+                  >
+                  <div v-if="hover">
+                    <v-card 
+                      :elevation="hover ? 16 : 2"
+                      :class="{ 'on-hover': hover }"
+                      class="mx-auto"
+                      href="https://ncsa.tableau.intranet.cnb/#/site/BCS/views/Zarate1Zalt/Historia1?:iid=2" 
+                      target="_blank"
+                    ><v-card-text class="font-weight-medium mt-3 text-center subtitle-1">
+                      Dashboard Zarate 1
+                      <span class="red--text">BETA</span>
+                    </v-card-text>
+                  </v-card>
+                    <h4><span>Focal Point: </span>Carlos Fautino Garcia</h4>
+                  </div>
+                  </v-hover>
+            </v-col>
+          </v-row>            
+          </v-container>
+        </v-main>
+            <v-menu v-model="ayuda" :close-on-content-click="false" :nudge-width="100" offset-x>
+              <template v-slot:activator="{ on, attrs }">
+                <v-fab-transition>
+                <v-btn
+                  fab
+                  bottom
+                  right
+                  v-bind="attrs" v-on="on"
+                >
+                  <v-icon>mdi-help</v-icon>
+                </v-btn>
+              </v-fab-transition>
+              </template>
+  
+              <v-card width="550">
+                <v-list>
+                  <v-list-item>
+                    <v-list-item-content>
+                      <v-list-item-title>Problemas para iniciar sesi&oacuten?</v-list-item-title>
+                    </v-list-item-content>
+                  </v-list-item>
+                </v-list>
+                <v-divider></v-divider>
+                <v-list>
+                  <v-list-item>
+                    <v-list-item-content>
+                      <v-list-item-title>Spotfire</v-list-item-title>
+                      <v-list-item-subtitle>Aseg&uacuterese de iniciar sesi&oacuten en su cuenta de Bayer y no en Monsanto.
+                      </v-list-item-subtitle>
+                      <v-list-item-subtitle>Si no puede iniciar sesi&oacuten en el servidor de tableau,
+                      </v-list-item-subtitle>
+                      <v-list-item-subtitle>p&oacutengase en contacto con: <b>andres.kipen@bayer.com</b></v-list-item-subtitle>
+                    </v-list-item-content>
+                  </v-list-item>
+                  <v-list-item>
+                    <v-list-item-content>
+                      <v-list-item-title>Tableau</v-list-item-title>
+                      <v-list-item-subtitle>Inicie sesi&oacuten en VPN.</v-list-item-subtitle>
+                      <v-list-item-subtitle>Al iniciar sesi&oacuten en Tableau Server, use bayer.cnb
+                      </v-list-item-subtitle>
+                      <v-list-item-subtitle> \ como prefijo para su ID de usuario.</v-list-item-subtitle>
+                      <v-list-item-subtitle>Si no puede iniciar sesi&oacuten en el servidor de tableau,
+                      </v-list-item-subtitle>
+                      <v-list-item-subtitle> p&oacutengase en contacto con: <b>andres.kipen@bayer.com</b></v-list-item-subtitle>
+                      <v-list-item-subtitle>Si a&uacuten no puede acceder al tablero, comun&iacutequese con su punto focal.
+                      </v-list-item-subtitle>
+                    </v-list-item-content>
+                  </v-list-item>
+                  <v-list-item>
+                    <v-list-item-content>
+                      <v-list-item-title>Por tableros de Log&iacutestica, y planificaci&oacuten contactar a Aquiles Lucchesi</v-list-item-title>
+                    </v-list-item-content>
+                  </v-list-item>
+                </v-list>
+              </v-card>
+            </v-menu>
+      </v-parallax>
+    </v-app>
+  </div>
+    <script>
+        new Vue({
+        el: '#app',        
+        vuetify: new Vuetify(),
+        data: {
+          foto:'https://bayergroup.sharepoint.com/sites/004767/digitalizacion/SitiosCustom/img/Imagen_Portal_Baja_04.jpg',
+          fotos: [
+            'https://bayergroup.sharepoint.com/sites/004767/digitalizacion/SitiosCustom/img/Imagen_Portal_Baja_01.jpg',
+            'https://bayergroup.sharepoint.com/sites/004767/digitalizacion/SitiosCustom/img/Imagen_Portal_Baja_03.jpg',
+            'https://bayergroup.sharepoint.com/sites/004767/digitalizacion/SitiosCustom/img/Imagen_Portal_Baja_02.jpg',
+            'https://bayergroup.sharepoint.com/sites/004767/digitalizacion/SitiosCustom/img/Imagen_Portal_Baja_04.jpg',
+            'https://bayergroup.sharepoint.com/sites/004767/digitalizacion/SitiosCustom/img/Imagen_Portal_Baja_05.jpg',
+            'https://bayergroup.sharepoint.com/sites/004767/digitalizacion/SitiosCustom/img/Imagen_Portal_Baja_06.jpg'
+          ],
+          ayuda: null,
+          kpi:['KPIs by Areas','KPIs by Pillars'],
+          hijos:['Customer Experience','Value','Sustainability','Innovation & Digitalization','People'],
+          stock:{},
+          menu:'menu',
+          Strategic:[
+            {
+              text: 'Dashboard Zarate2 Extendido',
+              link: 'https://ncsa.tableau.intranet.cnb/#/site/BCS/views/ZALTExt_lastedversion/Historia1?:iid=1',
+              oldlink:"https://ncsa.tableau.intranet.cnb/#/site/BCS/views/DashboardExt_Zart_22021v2/Historia1",
+              focal:"Pedro Ignacio Moyano",
+              beta:false,
+              disable: false,
+              stat: true
+            },
+            {
+              text: 'Dashboard BFT',
+              link: 'https://ncsa.tableau.intranet.cnb/#/site/BCS/views/BFT/Summary?:iid=1',
+              oldlink:"https://ncsa.tableau.intranet.cnb/#/site/BCS/views/Manufactura/Historia1?:iid=2",
+              focal:"Juan Manuel Flores",
+              beta:true,
+              disable: false,
+              stat: true
+            },
+            {
+              text: 'Dashboard Zarate 2 DRY',
+              link: 'https://ncsa.tableau.intranet.cnb/#/site/BCS/views/DRY/Summary',
+              oldlink: "https://ncsa.tableau.intranet.cnb/#/site/BCS/views/Manufactura-DRY/Historia1?:iid=1",
+              focal:"Dario Perugini",
+              beta:true,
+              disable: false,
+              stat: true
+            },
+            {
+              text: 'Dashboard Zarate 2 PACK',
+              link: 'https://ncsa.tableau.intranet.cnb/#/site/BCS/views/PACK/Summary?:iid=1',
+              oldlink:"https://ncsa.tableau.intranet.cnb/#/site/BCS/views/Manufactura-PACK/Historia2",
+              focal:"Denise Mantuano",
+              beta:true,
+              disable: false,
+              stat: true
+            },
+            
+          ],
+          Tactical: [{
+              text: 'Customer Experience',
+              color: "#00BAFD",
+              lista:[],
+              disable: false,
+              stat: true
+            },
+            {
+              text: 'Value',
+              color: "#FF3162",
+              lista:[],
+              disable: false,
+              stat: true
+            },
+            {
+              text: 'Sustainability',
+              color: "#89D329",
+              lista:[],
+              disable: false,
+              stat: true
+            },
+            {
+              text: 'Innovation & Digitalization',
+              color: "#00617F",
+              lista:[],
+              disable: false,
+              stat: true
+            },          
+            {
+              text: 'People',
+              color: "#684667",
+              lista:[],
+              disable: false,
+              stat: true
+            }
+          ],
+        },
+        mounted(){
+          this.importar()
+        },
+        methods: {
+          pasar(index,texto){
+            this.foto = this.fotos[index]
+            this.menu = texto
+          },
+          verlista(index){
+            if(this.Tactical[index].disable){
+              this.Tactical[index].disable = false
+            } else {
+              this.Tactical[index].disable = true
+            }
+          },
+          importar() {          
+            var endPointUrl = "https://bayergroup.sharepoint.com/sites/004767/digitalizacion/_api/web/lists/getbyTitle('Dashboard')/items";
+            axios.get(endPointUrl).then(response => {
+              this.stock = response.data.value
+              for (const dash in this.stock) {
+                for (const l in this.Tactical) {
+                  if (this.Tactical[l].text == this.stock[dash].Tactical_x0020_KPis) {
+                    this.Tactical[l].lista.push(this.stock[dash])
+                  }
+                }
+              }
+            })
+          }
+        }
+      })
+    </script>
+
+</body>
+
+</html>
